@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Action } from '@ngrx/store';
-import { Actions, ofType } from '@ngrx/effects';
+import { Action, createReducer, on, createAction } from '@ngrx/store';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DestinoViaje } from './destino-viaje.model';
@@ -12,7 +12,7 @@ export interface DestinosViajesState {
     favorito: DestinoViaje;
 } 
 
-export const initializeDestinosViajesState = function(): DestinosViajesState {
+export function initializeDestinosViajesState(): DestinosViajesState {
     return {
         items: [],
         loading: false,
@@ -26,12 +26,14 @@ export enum DestinosViajesActionTypes {
     ELEGIDO_FAVORITO = '[Destinos Viajes] Favorito',
     VOTE_UP = '[Destinos Viajes] Vote Up',
     VOTE_DOWN = '[Destinos Viajes] Vote Down',
+    INIT_MY_DATA_ACTION = '[Destinos Viajes] Init My Data',
 }
 
 export class NuevoDestinoAction implements Action {
     type = DestinosViajesActionTypes.NUEVO_DESTINO;
     constructor(public destino: DestinoViaje) {}
 }
+
 
 export class ElegidoFavoritoAction implements Action {
     type = DestinosViajesActionTypes.ELEGIDO_FAVORITO;
@@ -48,28 +50,32 @@ export class VoteDownAction implements Action {
     constructor(public destino: DestinoViaje) {}
 }
 
-export type DestinosViajesActions = NuevoDestinoAction | ElegidoFavoritoAction | VoteUpAction | VoteDownAction;
+export class InitMyDataAction implements Action {
+    type = DestinosViajesActionTypes.INIT_MY_DATA_ACTION;
+    constructor(public destinos: string[]) {}
+}
 
-// Reducers
-export function reducerDestinosViajes (state: DestinosViajesState, action: DestinosViajesActions): DestinosViajesState {
+export type DestinosViajesActions = NuevoDestinoAction | ElegidoFavoritoAction | VoteUpAction | VoteDownAction | InitMyDataAction;
+
+// Reducer
+export function reducerDestinosViajes (state: DestinosViajesState = initializeDestinosViajesState(), action: DestinosViajesActions): DestinosViajesState {
     switch(action.type){
         case DestinosViajesActionTypes.NUEVO_DESTINO: {
+            console.log([...state.items, (action as NuevoDestinoAction).destino] as DestinoViaje[])
             return {
                 ...state,
-                items: [...state.items, (action as NuevoDestinoAction).destino]
-            } as DestinosViajesState;
+                items: [...state.items, (action as NuevoDestinoAction).destino] as DestinoViaje[]
+            };
         }
         case DestinosViajesActionTypes.ELEGIDO_FAVORITO: {
-            state.items.forEach(x => x.setSelected(false));
             const fav: DestinoViaje = (action as ElegidoFavoritoAction).destino;
-            fav.setSelected(true);
             return {
                 ...state,
                 favorito: fav
-            } as DestinosViajesState;
+            };
         }
         case DestinosViajesActionTypes.VOTE_UP: {
-            const d: DestinoViaje = (action as VoteUpAction).destino;
+            let d = (action as VoteUpAction).destino;
             d.voteUp();
             return { ...state };
         }
@@ -78,17 +84,24 @@ export function reducerDestinosViajes (state: DestinosViajesState, action: Desti
             d.voteDown();
             return { ...state };
         }
-        default: return { ...state };
+        case DestinosViajesActionTypes.INIT_MY_DATA_ACTION: {
+            const destinos: string[] = (action as InitMyDataAction).destinos;
+            return {
+                ...state,
+                items: destinos.map((d) => new DestinoViaje(d, ''))
+            };
+        }
+        default: return state;
     }
 }
 
 // Effects
 @Injectable()
 export class DestinosViajesEffects {
-    nuevoAgregado$: Observable<Action> = this.actions$.pipe(
+    nuevoAgregado$ = createEffect(() =>this.actions$.pipe(
         ofType(DestinosViajesActionTypes.NUEVO_DESTINO),
         map((action: NuevoDestinoAction) => new ElegidoFavoritoAction(action.destino))
-    );
+    ));
 
     constructor(private actions$: Actions) {}
 }

@@ -1,9 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+// import { APP_CONFIG_VALUE, APP_CONFIG } from './app.module';
 
 describe('AppComponent', () => {
   beforeEach(() => TestBed.configureTestingModule({
-    declarations: [AppComponent]
+    declarations: [AppComponent],
+    /* providers: [
+      { provide: APP_CONFIG, useValue: APP_CONFIG_VALUE }
+    ] */
   }));
 
   it('should create the app', () => {

@@ -14,9 +14,13 @@ export class DestinoViajeComponent {
   @Input('idx') position: number;
   @HostBinding('attr.class') cssClass = 'col-md-4';
   @Output() clicked: EventEmitter<DestinoViaje>;
+  // @Output() voteup: EventEmitter<DestinoViaje>;
+  // @Output() votedown: EventEmitter<DestinoViaje>;
 
   constructor(private store: Store<AppState>){
     this.clicked = new EventEmitter();
+    // this.voteup = new EventEmitter();
+    // this.votedown = new EventEmitter();
   }
 
   ir() {
@@ -26,10 +30,12 @@ export class DestinoViajeComponent {
 
   voteUp() {
     this.store.dispatch(new VoteUpAction(this.destino));
+    // this.voteup.emit(this.destino);
     return false
   }
 
   voteDown() {
+    // this.votedown.emit(this.destino);
     this.store.dispatch(new VoteDownAction(this.destino));
     return false
   }
