@@ -69,20 +69,52 @@ export function reducerDestinosViajes (state: DestinosViajesState = initializeDe
         }
         case DestinosViajesActionTypes.ELEGIDO_FAVORITO: {
             const fav: DestinoViaje = (action as ElegidoFavoritoAction).destino;
+            const _items = state.items.map((item: DestinoViaje) => {
+                if (item.id === fav.id) {
+                  return DestinoViaje.createDestinoViaje(item).setSelected(true);
+                } else {
+                  return DestinoViaje.createDestinoViaje(item).setSelected(false);
+                }
+              });
             return {
                 ...state,
+                items: _items,
                 favorito: fav
             };
         }
         case DestinosViajesActionTypes.VOTE_UP: {
             let d = (action as VoteUpAction).destino;
-            d.voteUp();
-            return { ...state };
+            const _items = state.items.map((item: DestinoViaje) => {
+                if (item.id === d.id) {
+                    let clonedItem = DestinoViaje.createDestinoViaje(item);
+                    clonedItem.voteUp();
+                  return clonedItem
+                }
+                else {
+                    return item
+                }
+              });
+            return { 
+                ...state, 
+                items: _items
+            };
         }
         case DestinosViajesActionTypes.VOTE_DOWN: {
-            const d: DestinoViaje = (action as VoteDownAction).destino;
-            d.voteDown();
-            return { ...state };
+            let d: DestinoViaje = (action as VoteDownAction).destino;
+            const _items = state.items.map((item: DestinoViaje) => {
+                if (item.id === d.id) {
+                    let clonedItem = DestinoViaje.createDestinoViaje(item);
+                    clonedItem.voteDown();
+                  return clonedItem
+                }
+                else {
+                    return item
+                }
+              });
+            return { 
+                ...state, 
+                items: _items
+            };
         }
         case DestinosViajesActionTypes.INIT_MY_DATA_ACTION: {
             const destinos: string[] = (action as InitMyDataAction).destinos;

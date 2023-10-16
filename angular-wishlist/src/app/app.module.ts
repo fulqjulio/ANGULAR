@@ -25,6 +25,9 @@ import { Dexie } from 'dexie';
 import { TranslateLoader, TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Observable, from } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
+import { NgxMapboxGLModule } from 'ngx-mapbox-gl';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 import { AppComponent } from './app.component';
 import { DestinoViajeComponent } from './components/destino-viaje/destino-viaje.component';
@@ -50,6 +53,8 @@ import { VuelosMasInfoComponentComponent } from './components/vuelos/vuelos-mas-
 import { VuelosDetalleComponentComponent } from './components/vuelos/vuelos-detalle-component/vuelos-detalle-component.component';
 import { ReservasModule } from './reservas/reservas.module';
 import { DestinoViaje } from './models/destino-viaje.model';
+import { EspiameDirective } from './espiame.directive';
+import { TrackearClickDirective } from './trackear-click.directive';
 
 // app config
 export interface AppConfig {
@@ -72,7 +77,7 @@ export const childrenRoutesVuelos: Routes = [
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: ListaDestinosComponent },
-  { path: 'destino', component: DestinoDetalleComponent },
+  { path: 'destino/:id', component: DestinoDetalleComponent },
   { path: 'login', component: LoginComponent },
   {
     path: 'protected',
@@ -148,7 +153,7 @@ export class MyDataBase extends Dexie {
 
 export const db = new MyDataBase();
 
-// i18n init
+/* // i18n init
 class TranlationLoader implements TranslateLoader {
   constructor(private http: HttpClient) {}
 
@@ -181,7 +186,7 @@ class TranlationLoader implements TranslateLoader {
 
 function HttpLoaderFactory(http: HttpClient) {
 	return new TranlationLoader(http);
-}
+} */
 
 @NgModule({
   declarations: [
@@ -196,6 +201,8 @@ function HttpLoaderFactory(http: HttpClient) {
     VuelosMainComponentComponent,
     VuelosMasInfoComponentComponent,
     VuelosDetalleComponentComponent,
+    EspiameDirective,
+    TrackearClickDirective,
   ],
   imports: [
     BrowserModule,
@@ -207,13 +214,15 @@ function HttpLoaderFactory(http: HttpClient) {
     EffectsModule.forRoot([DestinosViajesEffects]),
     StoreDevtoolsModule.instrument(),
     ReservasModule,
-	TranslateModule.forRoot({
-		loader: {
-			provide: TranslateLoader,
-			useFactory: (HttpLoaderFactory),
-			deps: [HttpClient]
-		}
-	})
+    /* TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: (HttpLoaderFactory),
+        deps: [HttpClient]
+      }
+	  }), */
+    NgxMapboxGLModule,
+    BrowserAnimationsModule
   ],
   providers: [
     DestinosApiClient,
@@ -228,7 +237,7 @@ function HttpLoaderFactory(http: HttpClient) {
       multi: true,
     },
     MyDataBase,
-    TranslateService
+    // TranslateService
   ],
   bootstrap: [AppComponent],
 })
